@@ -24,6 +24,9 @@ def setup_test_app():
     original_db = database.DATABASE
     database.DATABASE = test_db
     
+    # Initialize the database to create tables
+    init_database()
+    
     # Create test app
     app = create_app()
     app.config['TESTING'] = True

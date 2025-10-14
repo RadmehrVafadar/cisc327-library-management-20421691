@@ -127,24 +127,10 @@ def test_borrow_book_patron_at_limit(setup_test_db):
         assert success == True
     
     # Try to borrow the 6th book (should fail due to limit)
-    # Note: There's a bug in the implementation - it uses > instead of >=
-    # So this test will currently fail because it allows 6 books
     success, message = borrow_book_by_patron("123456", 6)
     
-    # This assertion will fail with current buggy implementation
-    # The bug allows 6 books instead of max 5
-    # assert success == False
-    # assert "maximum borrowing limit" in message.lower()
-    
-    # For now, we test the buggy behavior to document the issue
-    assert success == True  # Bug: allows 6th book
-    
-    # Try to borrow the 7th book (should definitely fail)
-    add_book_to_catalog("Book 7", "Test Author", "1234567890126", 1)
-    success7, message7 = borrow_book_by_patron("123456", 7)
-    
-    assert success7 == False
-    assert "maximum borrowing limit" in message7.lower()
+    assert success == False
+    assert "maximum borrowing limit" in message.lower()
 
 def test_borrow_book_different_patrons(setup_test_db):
     """Test that different patrons can borrow books independently."""

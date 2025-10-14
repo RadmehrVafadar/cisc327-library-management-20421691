@@ -218,15 +218,15 @@ def search_books(search_term: str, search_type: str) -> List[Dict]:
     
     if search_type == 'isbn':
         books = conn.execute('''
-            SELECT * FROM books WHERE isbn = ? ORDER BY title
+            SELECT * FROM books WHERE isbn = ? AND available_copies > 0 ORDER BY title
         ''', (search_term,)).fetchall()
     elif search_type == 'title':
         books = conn.execute('''
-            SELECT * FROM books WHERE LOWER(title) LIKE LOWER(?) ORDER BY title
+            SELECT * FROM books WHERE LOWER(title) LIKE LOWER(?) AND available_copies > 0 ORDER BY title
         ''', (f'%{search_term}%',)).fetchall()
     elif search_type == 'author':
         books = conn.execute('''
-            SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?) ORDER BY title
+            SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?) AND available_copies > 0 ORDER BY title
         ''', (f'%{search_term}%',)).fetchall()
     else:
         books = []
