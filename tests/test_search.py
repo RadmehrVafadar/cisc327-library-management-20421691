@@ -320,7 +320,14 @@ def test_search_books_availability_in_results(setup_test_db):
     """Test that search results show current book availability."""
     # Add and borrow a book to test availability display
     add_book_to_catalog("Test Book", "Test Author", "1234567890123", 3)
-    borrow_success, _ = borrow_book_by_patron("123456", 1)
+    
+    # Find the book we just added to get its ID
+    conn = get_db_connection()
+    book_to_borrow = conn.execute("SELECT id FROM books WHERE isbn = '1234567890123'").fetchone()
+    conn.close()
+    book_id_to_borrow = book_to_borrow['id']
+    
+    borrow_success, _ = borrow_book_by_patron("123456", book_id_to_borrow)
     assert borrow_success == True
     
     result = search_books_in_catalog("Test Book", "title")

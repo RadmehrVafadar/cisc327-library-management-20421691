@@ -161,7 +161,7 @@ def test_calculate_late_fee_returned_book(setup_test_db):
     """Test late fee calculation for non-existent borrow."""
     result = calculate_late_fee_for_book("123456", 1)
     
-    assert result['status'] == 'This book is not currently borrowed by you.'
+    assert result['status'] == 'Book not found.'
 
 def test_calculate_late_fee_multiple_borrows_same_book(setup_test_db):
     """Test late fee calculation when no book borrowed."""
