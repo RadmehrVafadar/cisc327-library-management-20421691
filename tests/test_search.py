@@ -6,7 +6,7 @@ Tests R6: Book Search Functionality
 import pytest
 import sqlite3
 import os
-from library_service import search_books_in_catalog, add_book_to_catalog
+from library_service import search_books_in_catalog, add_book_to_catalog, borrow_book_by_patron
 from database import init_database, get_db_connection
 
 @pytest.fixture
