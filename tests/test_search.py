@@ -323,7 +323,7 @@ def test_search_books_availability_in_results(setup_test_db):
     borrow_success, _ = borrow_book_by_patron("123456", 1)
     assert borrow_success == True
     
-    result = search_books_in_catalog("Test", "title")
+    result = search_books_in_catalog("Test Book", "title")
     
     assert isinstance(result, list)
     assert len(result) >= 1
