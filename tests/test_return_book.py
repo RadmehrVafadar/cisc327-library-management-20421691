@@ -36,7 +36,7 @@ def setup_test_db():
         os.remove(test_db)
 
 def test_return_book_not_implemented(setup_test_db):
-    """Test that return_book_by_patron function is not implemented."""
+    """Test that return_book_by_patron function works correctly."""
     # Add and borrow a book first
     add_book_to_catalog("Test Book", "Test Author", "1234567890123", 3)
     borrow_success, _ = borrow_book_by_patron("123456", 1)
@@ -45,32 +45,31 @@ def test_return_book_not_implemented(setup_test_db):
     # Try to return the book
     success, message = return_book_by_patron("123456", 1)
     
-    # Function should return False with not implemented message
-    assert success == False
-    assert "not yet implemented" in message.lower()
+    # Function should return True with success message
+    assert success == True
+    assert "successfully returned" in message.lower()
 
 def test_return_book_invalid_patron_id_empty(setup_test_db):
     """Test return with empty patron ID - should fail when implemented."""
     # This test documents expected behavior when function is implemented
     success, message = return_book_by_patron("", 1)
     
-    # Currently returns not implemented, but when implemented should validate patron ID
     assert success == False
-    # When implemented, should check for: "invalid patron id" in message.lower()
+    assert "invalid patron id" in message.lower()
 
 def test_return_book_invalid_patron_id_wrong_length(setup_test_db):
     """Test return with invalid patron ID length - should fail when implemented."""
     success, message = return_book_by_patron("12345", 1)
     
     assert success == False
-    # When implemented, should validate 6-digit patron ID
+    assert "invalid patron id" in message.lower()
 
 def test_return_book_nonexistent_book(setup_test_db):
     """Test returning a book that doesn't exist - should fail when implemented."""
     success, message = return_book_by_patron("123456", 999)
     
     assert success == False
-    # When implemented, should check if book exists
+    assert "book not found" in message.lower()
 
 def test_return_book_not_borrowed_by_patron(setup_test_db):
     """Test returning a book not borrowed by the patron - should fail when implemented."""
@@ -80,7 +79,7 @@ def test_return_book_not_borrowed_by_patron(setup_test_db):
     success, message = return_book_by_patron("123456", 1)
     
     assert success == False
-    # When implemented, should verify the book was borrowed by this patron
+    assert "not currently borrowed" in message.lower()
 
 def test_return_book_already_returned(setup_test_db):
     """Test returning a book that was already returned - should fail when implemented."""
@@ -88,7 +87,7 @@ def test_return_book_already_returned(setup_test_db):
     success, message = return_book_by_patron("123456", 1)
     
     assert success == False
-    # When implemented, should check if book is currently borrowed
+    assert "not currently borrowed" in message.lower() or "book not found" in message.lower()
 
 def test_return_book_valid_scenario_no_late_fee(setup_test_db):
     """Test returning a book on time - should succeed when implemented."""
@@ -99,33 +98,22 @@ def test_return_book_valid_scenario_no_late_fee(setup_test_db):
     
     success, message = return_book_by_patron("123456", 1)
     
-    # Currently not implemented
-    assert success == False
-    assert "not yet implemented" in message.lower()
-    
-    # When implemented, should:
-    # - Return True for success
-    # - Update available copies (+1)
-    # - Set return_date in borrow_records
-    # - Calculate late fee (should be $0.00 for on-time return)
-    # - Include late fee information in message
+    # Should return True for success
+    assert success == True
+    assert "successfully returned" in message.lower()
+    # Should have no late fee
+    assert "no late fee" in message.lower() or "$0.00" in message
 
 def test_return_book_valid_scenario_with_late_fee(setup_test_db):
     """Test returning an overdue book - should calculate late fee when implemented."""
     success, message = return_book_by_patron("123456", 1)
     
-    # Currently not implemented
+    # Book not borrowed, should fail
     assert success == False
-    
-    # When implemented with overdue book, should:
-    # - Calculate late fee based on days overdue
-    # - $0.50/day for first 7 days overdue
-    # - $1.00/day for additional days after 7 days
-    # - Maximum $15.00 per book
-    # - Include late fee amount in success message
+    assert "not currently borrowed" in message.lower() or "book not found" in message.lower()
 
 def test_return_book_updates_available_copies(setup_test_db):
-    """Test that returning increases available copies - when implemented."""
+    """Test that returning increases available copies."""
     # Add a book with 3 copies and borrow one
     add_book_to_catalog("Test Book", "Test Author", "1234567890123", 3)
     borrow_success, _ = borrow_book_by_patron("123456", 1)
@@ -138,18 +126,18 @@ def test_return_book_updates_available_copies(setup_test_db):
     conn.close()
     assert book_before['available_copies'] == 2
     
-    # Try to return (currently not implemented)
+    # Return the book
     success, message = return_book_by_patron("123456", 1)
-    assert success == False
+    assert success == True
     
-    # When implemented, available copies should increase back to 3
-    # conn = database.get_db_connection()
-    # book_after = conn.execute('SELECT available_copies FROM books WHERE id = 1').fetchone()
-    # conn.close()
-    # assert book_after['available_copies'] == 3
+    # Available copies should increase back to 3
+    conn = database.get_db_connection()
+    book_after = conn.execute('SELECT available_copies FROM books WHERE id = 1').fetchone()
+    conn.close()
+    assert book_after['available_copies'] == 3
 
 def test_return_book_sets_return_date(setup_test_db):
-    """Test that returning sets return_date in borrow record - when implemented."""
+    """Test that returning sets return_date in borrow record."""
     # Add and borrow a book
     add_book_to_catalog("Test Book", "Test Author", "1234567890123", 3)
     borrow_success, _ = borrow_book_by_patron("123456", 1)
@@ -165,21 +153,21 @@ def test_return_book_sets_return_date(setup_test_db):
     conn.close()
     assert record_before['return_date'] is None
     
-    # Try to return (currently not implemented)
+    # Return the book
     success, message = return_book_by_patron("123456", 1)
-    assert success == False
+    assert success == True
     
-    # When implemented, return_date should be set to current datetime
-    # conn = database.get_db_connection()
-    # record_after = conn.execute('''
-    #     SELECT return_date FROM borrow_records 
-    #     WHERE patron_id = ? AND book_id = ?
-    # ''', ("123456", 1)).fetchone()
-    # conn.close()
-    # assert record_after['return_date'] is not None
+    # return_date should be set to current datetime
+    conn = database.get_db_connection()
+    record_after = conn.execute('''
+        SELECT return_date FROM borrow_records 
+        WHERE patron_id = ? AND book_id = ?
+    ''', ("123456", 1)).fetchone()
+    conn.close()
+    assert record_after['return_date'] is not None
 
 def test_return_book_multiple_patrons_same_book(setup_test_db):
-    """Test that each patron can return their own copy - when implemented."""
+    """Test that each patron can return their own copy."""
     # Add a book with multiple copies
     add_book_to_catalog("Test Book", "Test Author", "1234567890123", 3)
     
@@ -192,13 +180,9 @@ def test_return_book_multiple_patrons_same_book(setup_test_db):
     # First patron returns their copy
     success1, message1 = return_book_by_patron("123456", 1)
     
-    # Currently not implemented
-    assert success1 == False
-    
-    # When implemented:
-    # - First patron should be able to return successfully
-    # - Second patron should still have their copy borrowed
-    # - Available copies should increase by 1 (from 1 to 2)
+    # Should succeed
+    assert success1 == True
+    assert "successfully returned" in message1.lower()
 
 def test_return_book_invalid_patron_id_formats(setup_test_db):
     """Test return with various invalid patron ID formats."""
@@ -207,8 +191,7 @@ def test_return_book_invalid_patron_id_formats(setup_test_db):
     for invalid_id in invalid_ids:
         success, message = return_book_by_patron(invalid_id, 1)
         assert success == False
-    
-    # When implemented, should validate 6-digit numeric patron ID
+        assert "invalid patron id" in message.lower()
 
 def test_return_book_wrong_patron_for_borrowed_book(setup_test_db):
     """Test returning a book borrowed by different patron."""
@@ -221,8 +204,7 @@ def test_return_book_wrong_patron_for_borrowed_book(setup_test_db):
     success, message = return_book_by_patron("654321", 1)
     
     assert success == False
-    
-    # When implemented, should verify the book was borrowed by the returning patron
+    assert "not currently borrowed" in message.lower()
 
 def test_return_book_success_message_format(setup_test_db):
     """Test that successful return has properly formatted message."""
@@ -233,25 +215,18 @@ def test_return_book_success_message_format(setup_test_db):
     
     success, message = return_book_by_patron("123456", 1)
     
-    # Currently not implemented
-    assert success == False
-    assert "not yet implemented" in message.lower()
-    
-    # When implemented, success message should include:
-    # - Book title, return confirmation, late fee amount (if any)
-    # Example: 'Successfully returned "Test Book". Late fee: $0.00'
+    # Should succeed with proper message format
+    assert success == True
+    assert "successfully returned" in message.lower()
+    assert "test book" in message.lower()
 
 def test_return_book_late_fee_calculation_integration(setup_test_db):
     """Test that return integrates with late fee calculation."""
     success, message = return_book_by_patron("123456", 1)
     
-    # Currently not implemented
+    # Book not borrowed, should fail
     assert success == False
-    
-    # When implemented with overdue book, should:
-    # - Calculate late fee based on days overdue
-    # - Apply fee structure ($0.50/day first 7 days, $1.00/day after, max $15.00)
-    # - Include late fee amount in success message
+    assert "not currently borrowed" in message.lower() or "book not found" in message.lower()
 
 def test_return_book_database_updates_integration(setup_test_db):
     """Test that return properly updates database state."""
@@ -262,9 +237,12 @@ def test_return_book_database_updates_integration(setup_test_db):
     
     success, message = return_book_by_patron("123456", 1)
     
-    assert success == False  # Currently not implemented
+    # Should succeed
+    assert success == True
     
-    # When implemented, should:
-    # - Increase available_copies from 0 to 1
-    # - Set return_date in borrow_records table
-    # - Update borrowing history for patron status reports
+    # Check that available_copies increased from 0 to 1
+    import database
+    conn = database.get_db_connection()
+    book = conn.execute('SELECT available_copies FROM books WHERE id = 1').fetchone()
+    conn.close()
+    assert book['available_copies'] == 1

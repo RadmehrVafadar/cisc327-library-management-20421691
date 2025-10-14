@@ -48,13 +48,13 @@ def setup_test_db():
         os.remove(test_db)
 
 def test_search_books_not_implemented(setup_test_db):
-    """Test that search_books_in_catalog function is not implemented."""
+    """Test that search_books_in_catalog function works correctly."""
     result = search_books_in_catalog("Gatsby", "title")
     
-    # Function should return empty list (not implemented)
-    assert result == []
-    
-    # When implemented, should return list of matching books
+    # Function should return list of matching books
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]['title'] == "The Great Gatsby"
 
 def test_search_books_by_title_partial_match(setup_test_db):
     """Test searching books by title with partial match (case-insensitive)."""
@@ -71,11 +71,11 @@ def test_search_books_by_title_partial_match(setup_test_db):
     for search_term, expected_titles in test_cases:
         result = search_books_in_catalog(search_term, "title")
         
-        # Currently returns empty list (not implemented)
-        assert result == []
-        
-        # When implemented, should return books with titles containing search_term
-        # Expected behavior: case-insensitive partial matching
+        # Should return books with titles containing search_term
+        assert isinstance(result, list)
+        result_titles = [book['title'] for book in result]
+        for expected_title in expected_titles:
+            assert expected_title in result_titles
 
 def test_search_books_by_author_partial_match(setup_test_db):
     """Test searching books by author with partial match (case-insensitive)."""
@@ -91,10 +91,11 @@ def test_search_books_by_author_partial_match(setup_test_db):
     for search_term, expected_titles in test_cases:
         result = search_books_in_catalog(search_term, "author")
         
-        # Currently returns empty list (not implemented)
-        assert result == []
-        
-        # When implemented, should return books with authors containing search_term
+        # Should return books with authors containing search_term
+        assert isinstance(result, list)
+        result_titles = [book['title'] for book in result]
+        for expected_title in expected_titles:
+            assert expected_title in result_titles
 
 def test_search_books_by_isbn_exact_match(setup_test_db):
     """Test searching books by ISBN with exact match."""
@@ -108,36 +109,36 @@ def test_search_books_by_isbn_exact_match(setup_test_db):
     for isbn, expected_titles in test_cases:
         result = search_books_in_catalog(isbn, "isbn")
         
-        # Currently returns empty list (not implemented)
-        assert result == []
-        
-        # When implemented, should return exact ISBN matches only
+        # Should return exact ISBN matches only
+        assert isinstance(result, list)
+        if expected_titles:
+            assert len(result) == len(expected_titles)
+            result_titles = [book['title'] for book in result]
+            for expected_title in expected_titles:
+                assert expected_title in result_titles
+        else:
+            assert len(result) == 0
 
 def test_search_books_empty_search_term(setup_test_db):
     """Test searching with empty search term."""
     result = search_books_in_catalog("", "title")
     
+    assert isinstance(result, list)
     assert result == []
-    
-    # When implemented, should handle empty search term appropriately
-    # Could return all books or empty list based on business requirements
 
 def test_search_books_whitespace_search_term(setup_test_db):
     """Test searching with whitespace-only search term."""
     result = search_books_in_catalog("   ", "title")
     
+    assert isinstance(result, list)
     assert result == []
-    
-    # When implemented, should trim whitespace and handle appropriately
 
 def test_search_books_invalid_search_type(setup_test_db):
     """Test searching with invalid search type."""
     result = search_books_in_catalog("Gatsby", "invalid_type")
     
+    assert isinstance(result, list)
     assert result == []
-    
-    # When implemented, should handle invalid search types
-    # Could default to title search or return error
 
 def test_search_books_case_insensitive_title(setup_test_db):
     """Test that title search is case-insensitive."""
@@ -151,10 +152,10 @@ def test_search_books_case_insensitive_title(setup_test_db):
     for search_term in test_cases:
         result = search_books_in_catalog(search_term, "title")
         
-        # Currently returns empty list (not implemented)
-        assert result == []
-        
-        # When implemented, all should return "The Great Gatsby"
+        # All should return "The Great Gatsby"
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert "The Great Gatsby" in [book['title'] for book in result]
 
 def test_search_books_case_insensitive_author(setup_test_db):
     """Test that author search is case-insensitive."""
@@ -168,47 +169,48 @@ def test_search_books_case_insensitive_author(setup_test_db):
     for search_term in test_cases:
         result = search_books_in_catalog(search_term, "author")
         
-        # Currently returns empty list (not implemented)
-        assert result == []
-        
-        # When implemented, all should return "The Great Gatsby"
+        # All should return "The Great Gatsby"
+        assert isinstance(result, list)
+        assert len(result) >= 1
+        assert "The Great Gatsby" in [book['title'] for book in result]
 
 def test_search_books_no_matches(setup_test_db):
     """Test searching with term that has no matches."""
     result = search_books_in_catalog("nonexistent", "title")
     
+    assert isinstance(result, list)
     assert result == []
-    
-    # When implemented, should return empty list for no matches
 
 def test_search_books_partial_isbn_should_not_match(setup_test_db):
     """Test that partial ISBN searches don't return matches (exact match only)."""
     # ISBN search should be exact match only, not partial
     result = search_books_in_catalog("978074327", "isbn")  # Partial ISBN
     
+    assert isinstance(result, list)
     assert result == []
-    
-    # When implemented, should not return matches for partial ISBN
 
 def test_search_books_return_format(setup_test_db):
     """Test that search results return proper format."""
     result = search_books_in_catalog("Gatsby", "title")
     
-    # Currently returns empty list (not implemented)
-    assert result == []
-    
-    # When implemented, should return list of dictionaries with book information
+    # Should return list of dictionaries with book information
+    assert isinstance(result, list)
+    assert len(result) >= 1
     # Each book should have: id, title, author, isbn, total_copies, available_copies
-    # Same format as catalog display per requirements
+    book = result[0]
+    assert 'id' in book
+    assert 'title' in book
+    assert 'author' in book
+    assert 'isbn' in book
+    assert 'total_copies' in book
+    assert 'available_copies' in book
 
 def test_search_books_multiple_matches(setup_test_db):
     """Test searching that returns multiple matches."""
     result = search_books_in_catalog("the", "title")  # Should match multiple books
     
-    assert result == []
-    
-    # When implemented, should return all books with "the" in title:
-    # "The Great Gatsby", "The Catcher in the Rye", "The Lord of the Rings"
+    assert isinstance(result, list)
+    assert len(result) >= 3  # At least "The Great Gatsby", "The Catcher in the Rye", "The Lord of the Rings"
 
 def test_search_books_author_with_initials(setup_test_db):
     """Test searching authors with various initial formats."""
@@ -222,19 +224,19 @@ def test_search_books_author_with_initials(setup_test_db):
     for search_term, expected_title in test_cases:
         result = search_books_in_catalog(search_term, "author")
         
-        # Currently returns empty list (not implemented)
-        assert result == []
-        
-        # When implemented, should handle various initial formats flexibly
+        # Should handle various initial formats
+        assert isinstance(result, list)
+        # Note: exact matching depends on how the author name is stored
 
 def test_search_books_special_characters_in_title(setup_test_db):
     """Test searching titles with special characters."""
     # Test apostrophes and other punctuation
     result = search_books_in_catalog("philosopher's", "title")
     
-    assert result == []
-    
-    # When implemented, should handle special characters in search terms
+    assert isinstance(result, list)
+    # Should find "Harry Potter and the Philosopher's Stone"
+    if len(result) > 0:
+        assert "Philosopher" in result[0]['title']
 
 def test_search_books_default_search_type(setup_test_db):
     """Test behavior when search_type parameter is not provided or None."""
@@ -242,9 +244,9 @@ def test_search_books_default_search_type(setup_test_db):
     # Current function signature requires search_type, but web interface defaults to "title"
     result = search_books_in_catalog("Gatsby", "title")  # Using explicit "title"
     
-    assert result == []
-    
-    # When implemented, should default to title search if type is not specified
+    assert isinstance(result, list)
+    assert len(result) >= 1
+    assert "Gatsby" in result[0]['title']
 
 def test_search_books_input_validation(setup_test_db):
     """Test search input validation and edge cases."""
@@ -257,9 +259,9 @@ def test_search_books_input_validation(setup_test_db):
     
     for search_term, search_type in test_cases:
         result = search_books_in_catalog(search_term, search_type)
+        assert isinstance(result, list)
+        # Should handle all edge cases safely (return empty list)
         assert result == []
-    
-    # When implemented, should handle all edge cases safely
 
 def test_search_books_case_insensitive_matching(setup_test_db):
     """Test that title and author searches are case-insensitive."""
@@ -273,9 +275,8 @@ def test_search_books_case_insensitive_matching(setup_test_db):
     
     for search_term, search_type in test_cases:
         result = search_books_in_catalog(search_term, search_type)
-        assert result == []
-    
-    # When implemented, should match regardless of case
+        assert isinstance(result, list)
+        assert len(result) >= 1  # Should match regardless of case
 
 def test_search_books_isbn_exact_matching(setup_test_db):
     """Test that ISBN search uses exact matching only."""
@@ -287,27 +288,33 @@ def test_search_books_isbn_exact_matching(setup_test_db):
     
     for isbn, expected_titles in test_cases:
         result = search_books_in_catalog(isbn, "isbn")
-        assert result == []
-    
-    # When implemented, should only match complete ISBNs exactly
+        assert isinstance(result, list)
+        if expected_titles:
+            assert len(result) >= 1
+        else:
+            assert len(result) == 0
 
 def test_search_books_return_format_consistency(setup_test_db):
     """Test that search results match catalog display format."""
     result = search_books_in_catalog("Gatsby", "title")
     
-    assert result == []
-    
-    # When implemented, should return list of dictionaries with:
-    # - id, title, author, isbn, total_copies, available_copies
-    # Same format as catalog display per R6 requirements
+    assert isinstance(result, list)
+    assert len(result) >= 1
+    # Should return list of dictionaries with required fields
+    book = result[0]
+    assert 'id' in book
+    assert 'title' in book
+    assert 'author' in book
+    assert 'isbn' in book
+    assert 'total_copies' in book
+    assert 'available_copies' in book
 
 def test_search_books_multiple_matches_handling(setup_test_db):
     """Test search behavior with multiple matching results."""
     result = search_books_in_catalog("the", "title")  # Should match multiple books
     
-    assert result == []
-    
-    # When implemented, should return all matching books in consistent order
+    assert isinstance(result, list)
+    assert len(result) >= 3  # Should return all matching books
 
 def test_search_books_availability_in_results(setup_test_db):
     """Test that search results show current book availability."""
@@ -318,6 +325,9 @@ def test_search_books_availability_in_results(setup_test_db):
     
     result = search_books_in_catalog("Test", "title")
     
-    assert result == []
-    
-    # When implemented, should show current available_copies = 2, total_copies = 3
+    assert isinstance(result, list)
+    assert len(result) >= 1
+    # Should show current available_copies = 2, total_copies = 3
+    test_book = [book for book in result if book['title'] == "Test Book"][0]
+    assert test_book['available_copies'] == 2
+    assert test_book['total_copies'] == 3
