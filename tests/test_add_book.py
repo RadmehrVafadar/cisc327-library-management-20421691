@@ -6,7 +6,7 @@ Tests R1: Add Book To Catalog functionality
 import pytest
 import sqlite3
 import os
-from library_service import add_book_to_catalog
+from services.library_service import add_book_to_catalog
 from database import init_database, get_db_connection
 
 @pytest.fixture

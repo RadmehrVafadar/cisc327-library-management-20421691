@@ -7,7 +7,7 @@ import pytest
 import sqlite3
 import os
 from datetime import datetime, timedelta
-from library_service import borrow_book_by_patron, add_book_to_catalog
+from services.library_service import borrow_book_by_patron, add_book_to_catalog
 from database import init_database, get_db_connection, insert_book, insert_borrow_record
 
 @pytest.fixture

@@ -6,7 +6,7 @@ Tests that multiple functions work together correctly
 import pytest
 import os
 from datetime import datetime, timedelta
-from library_service import (
+from services.library_service import (
     add_book_to_catalog, borrow_book_by_patron, 
     return_book_by_patron, search_books_in_catalog,
     get_patron_status_report
